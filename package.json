@@ -1,0 +1,55 @@
+{
+  "name": "text-editor-kit",
+  "version": "1.0.0",
+  "description": "Custom text editor kit built with React and Tailwind",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "tsc && webpack --mode production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.1.0",
+    "prismjs": "^1.30.0",
+    "react-icons": "^5.4.0",
+    "react-simple-code-editor": "^0.14.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "autoprefixer": "^10.4.27",
+    "babel-loader": "^10.1.1",
+    "css-loader": "^7.1.4",
+    "mini-css-extract-plugin": "^2.10.1",
+    "postcss": "^8.5.8",
+    "postcss-loader": "^8.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.9.3",
+    "webpack": "^5.105.4",
+    "webpack-cli": "^7.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HYE0N1127/text-editor-kit.git"
+  },
+  "keywords": [
+    "react",
+    "editor",
+    "text-editor"
+  ],
+  "author": "HYE0N1127",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HYE0N1127/text-editor-kit/issues"
+  },
+  "homepage": "https://github.com/HYE0N1127/text-editor-kit#readme",
+  "types": "dist/types/index.d.ts"
+}

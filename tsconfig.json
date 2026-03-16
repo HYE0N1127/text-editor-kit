@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "esnext",
+    "jsx": "react-jsx", // React 17 이상 버전의 JSX 처리 방식
+
+    /* ⭐️ 라이브러리를 위한 핵심 옵션들 */
+    "declaration": true, // 타입 선언 파일(.d.ts)을 생성할 것인가? (무조건 true)
+    "declarationDir": "./dist/types", // 타입 선언 파일을 dist 폴더 안에 저장
+    "emitDeclarationOnly": true, // TS는 JS로 변환하지 않고 오직 타입 파일만 뽑아냄 (JS 변환은 Babel+Webpack이 담당)
+
+    /* 모듈 해석 및 호환성 */
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"], // src 폴더 안의 파일만 검사
+  "exclude": ["node_modules", "dist"] // 빌드 결과물과 패키지 폴더는 제외
+}
