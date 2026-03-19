@@ -1,16 +1,12 @@
-import { useRootIds } from "../context/editor/hooks";
-import ViewerBlock from "./item/index";
+import { State } from "../../types/editor/index";
+import ContentViewer from "./content/index";
 
-const Viewer = () => {
-  const rootIds = useRootIds();
+export type Props = {
+  data: State;
+};
 
-  return (
-    <div className="flex flex-col gap-1 pb-[12px]">
-      {rootIds.map((id) => (
-        <ViewerBlock key={id} id={id} />
-      ))}
-    </div>
-  );
+const Viewer = ({ data }: Props) => {
+  return <ContentViewer data={data} />;
 };
 
 export default Viewer;

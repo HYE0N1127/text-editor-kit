@@ -1,14 +1,25 @@
 import { memo } from "react";
-import { useBlock } from "../../context/editor/hooks";
 import Image from "../../block/typography/image/index";
 import Code from "../../block/typography/code/index";
 import Quote from "../../block/typography/quote/index";
 import Bullet from "../../block/typography/bullet/index";
 import Typography from "../../block/typography/index";
 import CodeViewer from "../code/index";
+import { State } from "../../../types/editor/index";
 
-const ViewerBlock = memo(({ id }: { id: string }) => {
-  const { block, childrenIds } = useBlock(id);
+type Props = {
+  id: string;
+  nodes: State["nodes"];
+};
+
+const ViewerBlock = memo(({ id, nodes }: Props) => {
+  const node = nodes[id];
+
+  if (node == null) {
+    return null;
+  }
+
+  const { block, childrenIds } = node;
 
   const renderBlockContent = () => {
     switch (block.type) {
@@ -59,7 +70,7 @@ const ViewerBlock = memo(({ id }: { id: string }) => {
       {childrenIds.length > 0 && (
         <div className="ml-6 flex flex-col gap-1 mt-1">
           {childrenIds.map((childId) => (
-            <ViewerBlock key={childId} id={childId} />
+            <ViewerBlock key={childId} id={childId} nodes={nodes} />
           ))}
         </div>
       )}
