@@ -1,11 +1,11 @@
 import { State } from "../../types/editor/index";
 import ContentViewer from "./content/index";
 
-export type Props = {
+export type ViewerProps = {
   data: State;
 };
 
-const Viewer = ({ data }: Props) => {
+const Viewer = ({ data }: ViewerProps) => {
   return <ContentViewer data={data} />;
 };
 

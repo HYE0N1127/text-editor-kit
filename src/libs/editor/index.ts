@@ -1,4 +1,3 @@
-import { EditorRepository } from "../../repository/editor/index";
 import {
   Block,
   BlockType,
@@ -13,15 +12,15 @@ export class Editor {
 
   private readonly blockListeners: Set<() => void> = new Set();
 
-  private readonly repository = new EditorRepository();
+  private readonly onChange?: (state: State) => void;
 
-  constructor() {
-    const savedData = this.repository.get();
-
+  constructor(initialData?: State, onChange?: (state: State) => void) {
     this._state =
-      savedData?.rootIds && savedData?.nodes
-        ? savedData
+      initialData?.rootIds && initialData?.nodes
+        ? initialData
         : { nodes: {}, rootIds: [] };
+
+    this.onChange = onChange;
   }
 
   public get state(): State {
@@ -30,7 +29,11 @@ export class Editor {
 
   private set state(value: State) {
     this._state = value;
-    this.repository.update(value);
+
+    if (this.onChange) {
+      this.onChange(value);
+    }
+
     this.blockListeners.forEach((listener) => listener());
   }
 
