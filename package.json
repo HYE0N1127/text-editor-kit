@@ -1,12 +1,15 @@
 {
-  "name": "text-editor-kit",
+  "name": "@hyeon1127/text-editor-kit",
   "version": "1.0.0",
   "description": "Custom text editor kit built with React and Tailwind",
-  "main": "index.js",
-  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "start": "tsc && webpack --mode production",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --mode production && tsc --emitDeclarationOnly",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
@@ -53,6 +56,5 @@
   "bugs": {
     "url": "https://github.com/HYE0N1127/text-editor-kit/issues"
   },
-  "homepage": "https://github.com/HYE0N1127/text-editor-kit#readme",
-  "types": "dist/types/index.d.ts"
+  "homepage": "https://github.com/HYE0N1127/text-editor-kit#readme"
 }
