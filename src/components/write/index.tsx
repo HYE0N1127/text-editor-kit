@@ -1,6 +1,8 @@
 import ContentEditor from "./content/index";
 import { State } from "../../types/editor/index";
 import { MarkdownEditorProvider } from "../context/editor/index";
+import { FocusProvider } from "../context/focus/index";
+import EditorBlockCreator from "./button/index";
 
 export type EditorProps = {
   initialData?: State;
@@ -16,9 +18,12 @@ export type EditorProps = {
 const Editor = ({ initialData, onChange }: EditorProps) => {
   return (
     <div className="w-full">
-      <MarkdownEditorProvider initial={initialData} onChange={onChange}>
-        <ContentEditor />
-      </MarkdownEditorProvider>
+      <FocusProvider>
+        <MarkdownEditorProvider initial={initialData} onChange={onChange}>
+          <ContentEditor />
+          <EditorBlockCreator />
+        </MarkdownEditorProvider>
+      </FocusProvider>
     </div>
   );
 };
