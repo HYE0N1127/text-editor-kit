@@ -2,7 +2,7 @@ import { State } from "../../types/editor/index";
 import ContentViewer from "./content/index";
 
 export type ViewerProps = {
-  data: State;
+  data?: State;
 };
 
 const Viewer = ({ data }: ViewerProps) => {
