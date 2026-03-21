@@ -2,146 +2,197 @@ import { useEffect, useRef } from "react";
 import { useEditor } from "../../../context/editor/hooks";
 import { useFocusHandler, useFocusState } from "../../../context/focus/hooks";
 import { Block, BlockType } from "../../../../types/editor/index";
-import { getTextStyle, resizeTextarea } from "../helpers";
+import { RichText as RichTextType } from "../../../../types/editor/index";
+import { getTextStyle } from "../helpers";
+import {
+  parseDOMToRichText,
+  parseInlineMarkdown,
+  richTextToHTML,
+} from "../helpers";
 import { MARKDOWN_RULES } from "../../../../constants/rules";
 import { generateId } from "../../../../utils/id";
-import { RichText } from "../../typography/rich-text/index";
 
 type Props = {
   id: string;
-  value: string;
+  value: RichTextType[];
   type: BlockType;
 };
 
-/**
- * 텍스트 블록 에디터 컴포넌트입니다.
- *
- * @param id 해당 블록의 고유 식별자
- * @param value 블록 내부에 입력된 텍스트 내용
- * @param type 블록의 현재 타입 (예: text, h1 등)
- */
 const TextEditor = ({ id, value, type }: Props) => {
   const { updateBlock, enter, deleteBlock, getPrevId } = useEditor();
   const { setFocusId } = useFocusHandler();
 
   const isFocus = useFocusState() === id;
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const editorRef = useRef<HTMLDivElement | null>(null);
 
-  // 텍스트 내용이 변경되거나 포커스를 얻었을 때 textarea의 높이를 자동으로 조절합니다.
+  // [최종 해결책 1]: 한글 조합 상태와, 마지막으로 동기화된 상태값을 추적합니다.
+  const isComposing = useRef(false);
+  const lastSyncedValue = useRef(JSON.stringify(value));
+
+  // [최종 해결책 2]: 컴포넌트 마운트 시, 또는 "외부(다른 블록 등)"에서 값이 변했을 때만 DOM을 그립니다.
   useEffect(() => {
-    if (isFocus) {
-      resizeTextarea(textareaRef.current);
+    if (!editorRef.current) return;
+
+    const currentValueStr = JSON.stringify(value);
+
+    // 유저가 타이핑 중일 때는 이 값이 같으므로 아래 로직이 무시됩니다! (커서 튐, 씹힘 완벽 방지)
+    if (lastSyncedValue.current !== currentValueStr) {
+      editorRef.current.innerHTML = richTextToHTML(value);
+      lastSyncedValue.current = currentValueStr;
     }
-  }, [value, isFocus]);
+  }, [value]);
 
-  // 블록이 포커스를 얻었을 때 textarea 엘리먼트에 포커스를 주고 커서를 끝으로 이동시킵니다.
+  // 포커스 처리 로직 (커서를 맨 뒤로)
   useEffect(() => {
-    if (isFocus && textareaRef.current) {
-      const element = textareaRef.current;
-
-      if (document.activeElement !== element) {
-        element.focus();
-
-        const length = element.value.length;
-        element.setSelectionRange(length, length);
-      }
+    if (
+      isFocus &&
+      editorRef.current &&
+      document.activeElement !== editorRef.current
+    ) {
+      editorRef.current.focus();
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(editorRef.current);
+      range.collapse(false);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
     }
   }, [isFocus]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
+  // [최종 해결책 3]: 입력, 파싱, 업데이트를 담당하는 핵심 함수
+  const processInput = (element: HTMLDivElement) => {
+    const text = element.textContent || "";
 
-    // 유저가 입력한 텍스트가 특정 마크다운 규칙(예: '# ', '```')으로 시작하는지 확인합니다.
+    // 1. 블록 마크다운 검사 (#, ``` 등)
     for (const [prefix, ruleType] of Object.entries(MARKDOWN_RULES)) {
       if (text.startsWith(prefix)) {
         if (ruleType === "code") {
-          // 코드 블록 규칙에 일치하는 경우, 트리거된 기호를 잘라내고 언어가 설정된 코드 블록 타입으로 변환합니다.
           updateBlock(id, {
             type: "code",
             value: text.slice(prefix.length),
             language: "javascript",
-          } as Block);
-
+          } as unknown as Block);
           return;
         }
-
-        // 일반 마크다운 블록 규칙에 일치하는 경우 해당 타입으로 블록을 업데이트합니다.
-        updateBlock(id, { type: ruleType, value: text.slice(prefix.length) });
+        updateBlock(id, {
+          type: ruleType,
+          value: [
+            {
+              text: text.slice(prefix.length),
+              annotations: {
+                bold: false,
+                italic: false,
+                strikethrough: false,
+                underline: false,
+              },
+            },
+          ],
+        } as Partial<Block>);
         return;
       }
     }
 
-    // 마크다운 문법에 해당하지 않는 경우 텍스트 값만 업데이트합니다.
-    updateBlock(id, { value: text });
-  };
+    // 2. DOM 읽어오기 및 파싱
+    const domRichTexts = parseDOMToRichText(element);
+    const finalRichTexts = parseInlineMarkdown(domRichTexts);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // IME 조합 중 발생하는 중복 키 이벤트를 방지합니다.
-    if (e.nativeEvent.isComposing) {
-      return;
+    // 3. 마크다운 스타일 적용 여부 확인
+    const isMarkdownApplied =
+      JSON.stringify(domRichTexts) !== JSON.stringify(finalRichTexts);
+
+    if (isMarkdownApplied) {
+      // 마크다운이 적용되었다면 화면(DOM)을 강제로 덮어씌웁니다.
+      element.innerHTML = richTextToHTML(finalRichTexts);
+
+      const selection = window.getSelection();
+      const range = document.createRange();
+
+      // [핵심 해결책]: 투명 글자 없이 커서를 span 바깥으로 빼내는 마법!
+      if (element.lastChild) {
+        // 커서를 가장 마지막 노드(span)의 '바깥쪽 바로 뒤'에 위치시킵니다.
+        range.setStartAfter(element.lastChild);
+      } else {
+        range.selectNodeContents(element);
+      }
+
+      range.collapse(true);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
     }
 
-    // 1. Enter를 누른 경우 새로운 텍스트 블록을 생성하고 포커스를 이동시킵니다.
+    // [마법의 코드]: 상태를 업데이트하기 직전에, "이건 내가 방금 동기화한 값이야!" 라고 표시를 남깁니다.
+    // 이렇게 하면 상단 useEffect가 반응하지 않아서 글자가 증발하거나 씹히지 않습니다.
+    lastSyncedValue.current = JSON.stringify(finalRichTexts);
+
+    // React 전역 상태 업데이트
+    updateBlock(id, { value: finalRichTexts } as Partial<Block>);
+  };
+
+  // IME(한글 조합) 이벤트 핸들러들
+  const handleCompositionStart = () => {
+    isComposing.current = true;
+  };
+
+  const handleCompositionEnd = (e: React.CompositionEvent<HTMLDivElement>) => {
+    isComposing.current = false;
+    processInput(e.currentTarget); // 조합이 끝나면 글자를 파싱합니다.
+  };
+
+  const handleInput = (e: React.SyntheticEvent<HTMLDivElement>) => {
+    // 한글 조립 중일 때는 아무것도 하지 않고 브라우저가 그리게 냅둡니다!
+    if (isComposing.current) return;
+    processInput(e.currentTarget);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.nativeEvent.isComposing) return;
+
+    const textContent = e.currentTarget.textContent || "";
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-
       const update = generateId();
-
       setFocusId(update);
       enter({ next: update, prev: id });
     }
 
-    // 2. 텍스트가 비어있는 상태에서 Backspace를 누른 경우
-    if (e.key === "Backspace" && value === "") {
-      // 블록 타입이 h1, h2 등이면 블록을 삭제하지 않고 일반 텍스트 타입으로 초기화합니다.
+    if (e.key === "Backspace" && textContent === "") {
       if (type !== "text") {
         e.preventDefault();
-
         updateBlock(id, { type: "text" });
         return;
       }
-
-      // 현재 블록이 이미 일반 텍스트 타입인 경우 블록을 삭제하고 이전 블록으로 포커스를 이동시킵니다.
       if (type === "text") {
         e.preventDefault();
         const prevId = getPrevId(id);
-
-        if (prevId != null) {
-          setFocusId(prevId);
-        }
-
+        if (prevId != null) setFocusId(prevId);
         deleteBlock(id);
       }
     }
   };
 
-  const sharedClasses = `block w-full p-0 break-words whitespace-pre-wrap ${getTextStyle(type)}`;
+  const sharedClasses = `block w-full p-0 break-words whitespace-pre-wrap outline-none cursor-text ${getTextStyle(type)}`;
 
   return (
     <div
       className="relative w-full min-h-[1.5em]"
       onClick={(e) => {
         const target = e.target as HTMLElement;
-        // 뷰어 모드에서 텍스트 영역을 클릭한 경우 포커스를 부여하여 편집 모드로 전환합니다.
-        // 단, 클릭한 대상이 하이퍼링크인 경우 모드를 전환하지 않고 링크 이동을 허용합니다.
-        if (!isFocus && target.tagName.toLowerCase() !== "a") {
-          setFocusId(id);
-        }
+        if (!isFocus && target.tagName.toLowerCase() !== "a") setFocusId(id);
       }}
     >
-      {isFocus ? (
-        <textarea
-          ref={textareaRef}
-          rows={1}
-          value={value}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          spellCheck={false}
-          className={`resize-none bg-transparent text-[#D4D4D4] caret-white focus:outline-none placeholder:text-gray-400 ${sharedClasses}`}
-        />
-      ) : (
-        <RichText value={value} type={type} />
-      )}
+      <div
+        ref={editorRef}
+        contentEditable={true}
+        suppressContentEditableWarning={true}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        spellCheck={false}
+        // children이나 dangerouslySetInnerHTML은 절대 쓰지 않습니다!
+        className={`resize-none bg-transparent outline-none caret-white placeholder:text-gray-400 ${sharedClasses} ${isFocus ? "text-[#D4D4D4]" : "text-gray-300"}`}
+      />
     </div>
   );
 };

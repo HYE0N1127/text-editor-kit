@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
-import { Block } from "../../../../types/editor/index";
+// [새로운 추가 내용]: RichText 타입을 가져옵니다.
+import { Block, RichText } from "../../../../types/editor/index";
 
 type Props = {
   block: Block;
@@ -21,17 +22,39 @@ const Text = ({ block, children }: Props) => {
     return <div className={className}>{children}</div>;
   }
 
+  const richTexts = block.value as RichText[];
+
+  const renderRichText = () => {
+    if (!Array.isArray(richTexts)) {
+      return null;
+    }
+
+    return richTexts.map((rt, index) => (
+      <span
+        key={index}
+        className={`
+          ${rt.annotations.bold ? "font-bold" : ""} 
+          ${rt.annotations.italic ? "italic" : ""}
+          ${rt.annotations.underline ? "underline" : ""}
+          ${rt.annotations.strikethrough ? "line-through" : ""}
+        `}
+      >
+        {rt.text}
+      </span>
+    ));
+  };
+
   switch (block.type) {
     case "h1":
-      return <p className={className}>{block.value}</p>;
+      return <p className={className}>{renderRichText()}</p>;
     case "h2":
-      return <p className={className}>{block.value}</p>;
+      return <p className={className}>{renderRichText()}</p>;
     case "h3":
-      return <p className={className}>{block.value}</p>;
+      return <p className={className}>{renderRichText()}</p>;
     case "quote":
-      return <p className={className}>{block.value}</p>;
+      return <p className={className}>{renderRichText()}</p>;
     default:
-      return <p className={className}>{block.value}</p>;
+      return <p className={className}>{renderRichText()}</p>;
   }
 };
 

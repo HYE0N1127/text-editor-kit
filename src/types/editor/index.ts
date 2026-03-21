@@ -10,9 +10,22 @@ export type State = {
   rootIds: string[];
 };
 
+export type TextAnnotations = {
+  italic: boolean;
+  bold: boolean;
+  strikethrough: boolean;
+  underline: boolean;
+};
+
+export type RichText = {
+  text: string;
+  annotations: TextAnnotations;
+  href?: string | null;
+};
+
 export type TextBlock = {
   type: "text" | "h1" | "h2" | "h3" | "bullet" | "quote";
-  value: string;
+  value: RichText[];
 };
 
 export type ImageBlock = {

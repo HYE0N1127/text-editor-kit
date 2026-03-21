@@ -1,10 +1,16 @@
 import { useEffect, useRef } from "react";
 import { useBlock, useEditor } from "../../../context/editor/hooks";
 import { useFocusHandler, useFocusState } from "../../../context/focus/hooks";
-import { TextBlock } from "../../../../types/editor/index";
-import { resizeTextarea } from "../helpers";
+import {
+  TextBlock,
+  RichText as RichTextType,
+} from "../../../../types/editor/index";
+import { parseDOMToRichText, parseInlineMarkdown } from "../helpers";
 import { generateId } from "../../../../utils/id";
 
+/**
+ * TextEditor랑 합칠만한듯, 한 추상클래스로 묶어보기
+ */
 type Props = {
   id: string;
 };
@@ -21,39 +27,52 @@ const BulletEditor = ({ id }: Props) => {
   const { setFocusId } = useFocusHandler();
 
   const isFocus = useFocusState() === id;
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const editorRef = useRef<HTMLDivElement | null>(null);
 
-  const value = (block as TextBlock).value ?? "";
+  // [새로운 추가 내용]: value를 string이 아닌 RichTextType[]으로 처리합니다.
+  const value = (block.value as unknown as RichTextType[]) || [];
 
   // 텍스트 내용이 변경될 때 textarea의 높이를 자동으로 조절합니다.
+  // [새로운 추가 내용]: contentEditable div는 자동 확장되므로 resizeTextarea가 불필요하여 제거했습니다.
   useEffect(() => {
-    resizeTextarea(textareaRef.current);
+    // resizeTextarea(textareaRef.current);
   }, [value]);
 
   // 블록이 포커스를 얻었을 때 textarea 엘리먼트에 포커스를 주고 커서를 끝으로 이동시킵니다.
   useEffect(() => {
-    if (isFocus && textareaRef.current) {
-      const element = textareaRef.current;
+    if (isFocus && editorRef.current) {
+      const element = editorRef.current;
       if (document.activeElement !== element) {
         element.focus();
-        const length = element.value.length;
-        element.setSelectionRange(length, length);
+
+        // [새로운 추가 내용]: Selection API로 커서를 끝으로 이동
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        range.collapse(false);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
       }
     }
   }, [isFocus]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    editor.updateBlock(id, { value: text });
+  // [새로운 추가 내용]: ChangeEvent 대신 SyntheticEvent 사용 및 파서 로직 적용
+  const handleInput = (e: React.SyntheticEvent<HTMLDivElement>) => {
+    const domRichTexts = parseDOMToRichText(e.currentTarget);
+    const finalRichTexts = parseInlineMarkdown(domRichTexts);
+
+    // [새로운 추가 내용]: Block 타입 구조에 맞게 캐스팅하여 업데이트
+    editor.updateBlock(id, { value: finalRichTexts as any });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     // IME 조합 중 발생하는 중복 키 이벤트를 방지합니다.
     if (e.nativeEvent.isComposing) {
       return;
     }
 
     const isModifier = e.metaKey || e.ctrlKey;
+    const textContent = e.currentTarget.textContent || "";
 
     // 1. (Cmd/Ctrl) + Enter를 누른 경우
     // 현재 블록의 자식으로 새로운 bullet 블록을 생성합니다.
@@ -61,10 +80,10 @@ const BulletEditor = ({ id }: Props) => {
       e.preventDefault();
       const newChildId = generateId();
 
-      const update: TextBlock = {
+      const update = {
         type: "bullet",
-        value: "",
-      };
+        value: [], // [새로운 추가 내용]: 빈 배열로 초기화
+      } as unknown as TextBlock;
 
       editor.addChild(id, update, newChildId);
       setFocusId(newChildId);
@@ -85,7 +104,8 @@ const BulletEditor = ({ id }: Props) => {
     }
 
     // 3. 텍스트가 비어있는 상태에서 Backspace를 누른 경우
-    if (e.key === "Backspace" && value === "") {
+    // [새로운 추가 내용]: value === "" 대신 textContent === ""로 체크합니다.
+    if (e.key === "Backspace" && textContent === "") {
       e.preventDefault();
 
       // 최상위 루트에 존재하는 경우, bullet 타입을 해제하고 일반 텍스트 블록으로 전환합니다.
@@ -106,17 +126,43 @@ const BulletEditor = ({ id }: Props) => {
     }
   };
 
+  const renderRichText = () => {
+    if (!value || value.length === 0) return null;
+    return value.map((richText, index) => (
+      <span
+        key={index}
+        className={`
+          ${richText.annotations.bold ? "font-bold" : ""} 
+          ${richText.annotations.italic ? "italic" : ""}
+          ${richText.annotations.underline ? "underline" : ""}
+          ${richText.annotations.strikethrough ? "line-through" : ""}
+        `}
+      >
+        {richText.text}
+      </span>
+    ));
+  };
+
   return (
-    <div className="group relative flex w-full items-start py-0.5">
-      <textarea
-        ref={textareaRef}
-        rows={1}
-        value={value}
-        onChange={handleChange}
+    <div
+      className="group relative flex w-full items-start gap-2 py-0.5"
+      onClick={(e) => {
+        if (!isFocus) setFocusId(id);
+      }}
+    >
+      {/* [새로운 추가 내용]: 좌측의 불릿 점 아이콘 */}
+      <span className="select-none mt-[0.3em] text-xl leading-none">•</span>
+      <div
+        ref={editorRef}
+        contentEditable={true}
+        suppressContentEditableWarning={true}
+        onInput={handleInput}
         onKeyDown={handleKeyDown}
-        onFocus={() => setFocusId(id)}
-        className="block w-full resize-none bg-transparent p-0 text-base leading-6 focus:outline-none placeholder:text-gray-400"
-      />
+        spellCheck={false}
+        className={`block flex-1 w-full resize-none bg-transparent p-0 text-base leading-6 focus:outline-none placeholder:text-gray-400 break-words whitespace-pre-wrap outline-none caret-white cursor-text ${isFocus ? "text-[#D4D4D4]" : "text-gray-300"}`}
+      >
+        {renderRichText()}
+      </div>
     </div>
   );
 };
