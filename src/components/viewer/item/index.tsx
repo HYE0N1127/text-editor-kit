@@ -6,6 +6,7 @@ import Bullet from "../../block/typography/bullet/index";
 import Typography from "../../block/typography/index";
 import CodeViewer from "../code/index";
 import { State } from "../../../types/editor/index";
+import { renderFormattedText } from "../../block/typography/rich-text/helpers";
 
 type Props = {
   id: string;
@@ -46,13 +47,25 @@ const ViewerBlock = memo(({ id, nodes }: Props) => {
         );
       }
       case "quote": {
-        return <Quote block={block}>{block.value || "\u00A0"}</Quote>;
+        return (
+          <Quote block={block}>
+            {renderFormattedText(block.value || "\u00A0")}
+          </Quote>
+        );
       }
       case "bullet": {
-        return <Bullet block={block}>{block.value || "\u00A0"}</Bullet>;
+        return (
+          <Bullet block={block}>
+            {renderFormattedText(block.value || "\u00A0")}
+          </Bullet>
+        );
       }
       default: {
-        return <Typography block={block}>{block.value || "\u00A0"}</Typography>;
+        return (
+          <Typography block={block}>
+            {renderFormattedText(block.value || "\u00A0")}
+          </Typography>
+        );
       }
     }
   };

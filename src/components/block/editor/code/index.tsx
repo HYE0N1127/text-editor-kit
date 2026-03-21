@@ -71,6 +71,7 @@ const CodeEditor = ({ id, block }: Props) => {
           fontSize: 14,
           minHeight: "40px",
           backgroundColor: "transparent",
+          color: "white",
         }}
         className="bg-transparent"
         textareaClassName="focus:outline-none"
