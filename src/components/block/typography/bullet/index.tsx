@@ -1,5 +1,4 @@
 import { PropsWithChildren } from "react";
-// [새로운 추가 내용]: RichText 타입을 가져옵니다.
 import { Block, RichText } from "../../../../types/editor/index";
 
 type Props = {
@@ -38,7 +37,6 @@ export const Bullet = ({ block, children }: Props) => {
         <div className="h-1.5 w-1.5 rounded-full bg-gray-900 dark:bg-white" />
       </div>
 
-      {/* [새로운 추가 내용]: block.value 대신 renderRichText() 호출 */}
       {children ? children : <p className={style}>{renderRichText()}</p>}
     </div>
   );

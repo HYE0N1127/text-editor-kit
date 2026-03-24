@@ -5,9 +5,8 @@ import Quote from "../../block/typography/quote/index";
 import Bullet from "../../block/typography/bullet/index";
 import Typography from "../../block/typography/index";
 import CodeViewer from "../code/index";
-// [새로운 추가 내용]: State와 함께 RichText 타입을 가져옵니다.
 import { State, RichText as RichTextType } from "../../../types/editor/index";
-// [새로운 추가 내용]: 기존에 string을 처리하던 renderFormattedText는 제거하고 컴포넌트 내부의 배열 렌더러로 대체합니다.
+import { getAnnotationClasses } from "../../block/editor/editor.helper";
 
 type Props = {
   id: string;
@@ -23,28 +22,35 @@ const ViewerBlock = memo(({ id, nodes }: Props) => {
 
   const { block, childrenIds } = node;
 
-  // [새로운 추가 내용]: RichText 배열을 렌더링하는 내부 헬퍼 함수입니다.
-  // 텍스트가 비어있어 배열 길이가 0일 경우, 높이 유지를 위해 기존처럼 "\u00A0"를 반환합니다.
+  /**
+   * RichText 배열을 받아 화면에 렌더링하는 헬퍼 함수입니다.
+   *
+   * @param value 렌더링할 RichText 배열 또는 문자열 데이터
+   * @returns 스타일이 적용된 span 태그 배열 또는 빈 줄 유지를 위한 공백문자
+   */
   const renderRichText = (value: unknown) => {
     const richTexts = value as RichTextType[];
 
+    // 텍스트가 배열이 아니거나 비어있을 경우, 블록의 높이 유지를 위해 공백문자를 반환합니다.
     if (!Array.isArray(richTexts) || richTexts.length === 0) {
       return "\u00A0";
     }
 
-    return richTexts.map((rt, index) => (
-      <span
-        key={index}
-        className={`
-          ${rt.annotations.bold ? "font-bold" : ""} 
-          ${rt.annotations.italic ? "italic" : ""}
-          ${rt.annotations.underline ? "underline" : ""}
-          ${rt.annotations.strikethrough ? "line-through" : ""}
-        `}
-      >
-        {rt.text}
-      </span>
-    ));
+    return richTexts.map((rt, index) => {
+      // 헬퍼 함수를 사용하여 객체를 Tailwind 클래스 문자열로 깔끔하게 변환합니다.
+      const classes = getAnnotationClasses(rt.annotations);
+
+      // 적용할 스타일이 없다면 불필요한 class 속성 없이 텍스트만 렌더링합니다.
+      if (!classes) {
+        return <span key={index}>{rt.text}</span>;
+      }
+
+      return (
+        <span key={index} className={classes}>
+          {rt.text}
+        </span>
+      );
+    });
   };
 
   const renderBlockContent = () => {
@@ -54,7 +60,7 @@ const ViewerBlock = memo(({ id, nodes }: Props) => {
           <Image id={id} block={block}>
             {block.value ? (
               <img
-                src={block.value as string} // [새로운 추가 내용]: Image의 value는 string이므로 타입 단언 추가
+                src={block.value as string}
                 alt="업로드된 이미지"
                 className="max-w-full rounded-md"
               />
@@ -72,27 +78,14 @@ const ViewerBlock = memo(({ id, nodes }: Props) => {
         );
       }
       case "quote": {
-        return (
-          <Quote block={block}>
-            {/* [새로운 추가 내용]: 내부 렌더러 함수로 대체합니다. */}
-            {renderRichText(block.value)}
-          </Quote>
-        );
+        return <Quote block={block}>{renderRichText(block.value)}</Quote>;
       }
       case "bullet": {
-        return (
-          <Bullet block={block}>
-            {/* [새로운 추가 내용]: 내부 렌더러 함수로 대체합니다. */}
-            {renderRichText(block.value)}
-          </Bullet>
-        );
+        return <Bullet block={block}>{renderRichText(block.value)}</Bullet>;
       }
       default: {
         return (
-          <Typography block={block}>
-            {/* [새로운 추가 내용]: 내부 렌더러 함수로 대체합니다. */}
-            {renderRichText(block.value)}
-          </Typography>
+          <Typography block={block}>{renderRichText(block.value)}</Typography>
         );
       }
     }

@@ -1,5 +1,4 @@
 import { PropsWithChildren } from "react";
-// [새로운 추가 내용]: RichText 타입을 가져옵니다.
 import { Block, RichText } from "../../../../types/editor/index";
 
 type Props = {
