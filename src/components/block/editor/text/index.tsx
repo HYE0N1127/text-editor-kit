@@ -76,42 +76,58 @@ const TextEditor = ({ id, value, type }: Props) => {
     }
   }, [isFocus]);
 
-  const processInput = (element: HTMLDivElement) => {
+  const processInput = (element: HTMLDivElement, isComposingNow = false) => {
     // 커서 보정을 위해 투명 텍스트를 제외한 순수 텍스트의 길이를 미리 계산합니다.
     const text = (element.textContent || "").replace(new RegExp(ZWS, "g"), "");
     const oldLength = text.length;
 
-    // 현재 텍스트가 마크다운 블록 문법을 만족하는지 검사합니다.
-    for (const [prefix, ruleType] of Object.entries(MARKDOWN_RULES)) {
-      if (text.startsWith(prefix)) {
-        if (ruleType === "code") {
+    // 한글 조합 중이 아닐 때만 블록 마크다운 문법을 검사합니다.
+    if (!isComposingNow) {
+      for (const [prefix, ruleType] of Object.entries(MARKDOWN_RULES)) {
+        if (text.startsWith(prefix)) {
+          if (ruleType === "code") {
+            updateBlock(id, {
+              type: "code",
+              value: text.slice(prefix.length),
+              language: "javascript",
+            } as unknown as Block);
+            return;
+          }
+
           updateBlock(id, {
-            type: "code",
-            value: text.slice(prefix.length),
-            language: "javascript",
-          } as unknown as Block);
+            type: ruleType,
+            value: [
+              {
+                text: text.slice(prefix.length),
+                annotations: {
+                  bold: false,
+                  italic: false,
+                  strikethrough: false,
+                  underline: false,
+                },
+              },
+            ],
+          } as Partial<Block>);
           return;
         }
-
-        updateBlock(id, {
-          type: ruleType,
-          value: [
-            {
-              text: text.slice(prefix.length),
-              annotations: {
-                bold: false,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-              },
-            },
-          ],
-        } as Partial<Block>);
-        return;
       }
     }
 
     const domRichTexts = parseDOMToRichText(element);
+
+    // 한글 조합 중일 경우, DOM 렌더링 갱신 없이 상태값만 업데이트합니다.
+    if (isComposingNow) {
+      const composingRichTexts = domRichTexts
+        .map((seg) => ({
+          ...seg,
+          text: seg.text.replace(new RegExp(ZWS, "g"), ""),
+        }))
+        .filter((seg) => seg.text.length > 0);
+
+      lastSyncedValue.current = JSON.stringify(composingRichTexts);
+      updateBlock(id, { value: composingRichTexts as any });
+      return;
+    }
 
     // 텍스트 내부의 인라인 마크다운 요소들을 찾아 스타일 객체로 변환합니다.
     let finalRichTexts = parseInlineMarkdown(domRichTexts)
@@ -147,7 +163,9 @@ const TextEditor = ({ id, value, type }: Props) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.nativeEvent.isComposing) return;
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
 
     const selection = window.getSelection();
 
@@ -296,7 +314,10 @@ const TextEditor = ({ id, value, type }: Props) => {
           processInput(e.currentTarget);
         }}
         onInput={(e) => {
-          if (isComposing.current) return;
+          if (isComposing.current) {
+            return;
+          }
+
           processInput(e.currentTarget);
         }}
         onKeyDown={handleKeyDown}

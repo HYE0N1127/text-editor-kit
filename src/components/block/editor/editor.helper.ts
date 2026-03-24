@@ -130,7 +130,7 @@ export const parseInlineMarkdown = (
     const parts = seg.text.split(MARKDOWN_REGEX);
 
     parts.forEach((part) => {
-      if (!part) {
+      if (part == null) {
         return;
       }
 
@@ -257,7 +257,7 @@ export const setCaretPosition = (element: HTMLElement, offset: number) => {
 
   const sel = window.getSelection();
 
-  if (sel) {
+  if (sel != null) {
     sel.removeAllRanges();
     sel.addRange(range);
   }
