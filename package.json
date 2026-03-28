@@ -1,6 +1,6 @@
 {
   "name": "@hyeon1127/text-editor-kit",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Custom text editor kit built with React and Tailwind",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
