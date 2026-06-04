@@ -1,4 +1,4 @@
-import { PropsWithChildren, useMemo } from "react";
+import { PropsWithChildren, useRef } from "react";
 import { Editor } from "../../../libs/editor/index";
 import { MarkdownEditorContext } from "./contexts";
 import { State } from "../../../types/editor/index";
@@ -13,10 +13,14 @@ export const MarkdownEditorProvider = ({
   initial,
   onChange,
 }: Props) => {
-  const value = useMemo(() => new Editor(initial, onChange), []);
+  const editorRef = useRef<Editor | null>(null);
+
+  if (editorRef.current === null) {
+    editorRef.current = new Editor(initial, onChange);
+  }
 
   return (
-    <MarkdownEditorContext.Provider value={value}>
+    <MarkdownEditorContext.Provider value={editorRef.current}>
       {children}
     </MarkdownEditorContext.Provider>
   );
