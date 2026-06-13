@@ -3,10 +3,12 @@ import { State } from "../../types/editor/index";
 import { MarkdownEditorProvider } from "../context/editor/index";
 import { FocusProvider } from "../context/focus/index";
 import EditorBlockCreator from "./button/index";
+import ImageDropZone from "../drag-drop/image/index";
 
 export type EditorProps = {
   initialData?: State;
   onChange?: (data: State) => void;
+  onImageUpload?: (file: File) => Promise<string>;
 };
 
 /**
@@ -15,13 +17,15 @@ export type EditorProps = {
  * @param Props.initialData - Editor의 초기 데이터(default: undefined)
  * @param Props.onChange - Editor 내부 데이터가 바뀔 때 마다 실행 될 함수
  */
-const Editor = ({ initialData, onChange }: EditorProps) => {
+const Editor = ({ initialData, onChange, onImageUpload }: EditorProps) => {
   return (
     <div className="w-full">
       <FocusProvider>
         <MarkdownEditorProvider initial={initialData} onChange={onChange}>
-          <ContentEditor />
-          <EditorBlockCreator />
+          <ImageDropZone onImageUpload={onImageUpload}>
+            <ContentEditor />
+            <EditorBlockCreator />
+          </ImageDropZone>
         </MarkdownEditorProvider>
       </FocusProvider>
     </div>
