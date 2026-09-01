@@ -65,7 +65,10 @@ const EditorBlock = memo(({ id }: { id: string }) => {
         )}
 
         <div className="flex w-6 shrink-0 items-center justify-center self-stretch invisible opacity-0 transition-all duration-200 group-hover/line:visible group-hover/line:opacity-100">
-          <div className="flex h-5 w-4 cursor-grab items-center justify-center rounded text-[var(--editor-drag-icon)] hover:text-[var(--editor-drag-icon-hover)] transition-colors active:cursor-grabbing">
+          <div
+            data-drag-handle
+            className="flex h-5 w-4 cursor-grab items-center justify-center rounded text-[var(--editor-drag-icon)] hover:text-[var(--editor-drag-icon-hover)] transition-colors active:cursor-grabbing"
+          >
             <MdDragIndicator size={18} />
           </div>
         </div>

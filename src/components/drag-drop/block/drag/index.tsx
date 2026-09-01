@@ -23,7 +23,6 @@ const Dragger = ({ id, children }: Props) => {
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     const found = target.closest("[data-drag-handle]");
-    console.log("mousedown target:", target, "found handle:", found);
     canDragRef.current = Boolean(found);
   };
 

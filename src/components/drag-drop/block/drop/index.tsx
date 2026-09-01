@@ -42,13 +42,6 @@ export const DropZone = <T extends ElementType = "div">({
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
-
-    // 드래그가 시작된 지점이 핸들 또는 핸들의 자손이 아니면 드래그를 취소
-    if (!target.closest("[data-drag-handle]")) {
-      e.preventDefault();
-      return;
-    }
-
     const targetBlock = target.closest("[id]") as HTMLElement | null;
 
     if (targetBlock && targetBlock.id) {
