@@ -1,3 +1,5 @@
+import "./styles.css";
+
 export { default as Editor } from "./components/write/index";
 export { default as Viewer } from "./components/viewer/index";
 

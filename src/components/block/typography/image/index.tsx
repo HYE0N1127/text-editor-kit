@@ -15,7 +15,7 @@ const Image = ({ id, block, children }: Props) => {
       <div className="w-full flex justify-center items-center py-10 select-none">
         <div className="p-3 rounded-full shadow-sm">
           <svg
-            className="animate-spin h-6 w-6 text-gray-500"
+            className="animate-spin h-6 w-6 text-[var(--editor-spinner)]"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -42,7 +42,7 @@ const Image = ({ id, block, children }: Props) => {
   return (
     <div className="relative max-w-full rounded-lg transition-all group select-none">
       {isFocus && (
-        <div className="absolute inset-0 bg-blue-500/95 rounded-lg pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-[var(--editor-accent)]/95 rounded-lg pointer-events-none z-0" />
       )}
 
       <img

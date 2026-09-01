@@ -14,7 +14,7 @@ const CodeViewer = ({ block }: Props) => {
 
   return (
     <div className="relative w-full h-full p-[16px]">
-      <div className="absolute right-2 top-2 z-10 select-none text-xs text-gray-500">
+      <div className="absolute right-2 top-2 z-10 select-none text-xs text-[var(--editor-code-label)]">
         {language}
       </div>
 

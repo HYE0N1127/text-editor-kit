@@ -25,7 +25,7 @@ export const renderFormattedText = (text: string) => {
     // bold : **text**
     if (part.length >= 5 && part.startsWith("**") && part.endsWith("**")) {
       return (
-        <span key={index} className="font-bold text-white">
+        <span key={index} className="font-bold text-[var(--editor-text)]">
           {part.slice(2, -2)}
         </span>
       );
@@ -34,7 +34,10 @@ export const renderFormattedText = (text: string) => {
     // underline : __text__
     if (part.length >= 5 && part.startsWith("__") && part.endsWith("__")) {
       return (
-        <span key={index} className="underline underline-offset-4 text-white">
+        <span
+          key={index}
+          className="underline underline-offset-4 text-[var(--editor-text)]"
+        >
           {part.slice(2, -2)}
         </span>
       );
@@ -43,7 +46,7 @@ export const renderFormattedText = (text: string) => {
     // middle-line : ~~text~~
     if (part.length >= 5 && part.startsWith("~~") && part.endsWith("~~")) {
       return (
-        <span key={index} className="line-through text-white">
+        <span key={index} className="line-through text-[var(--editor-text)]">
           {part.slice(2, -2)}
         </span>
       );
@@ -52,7 +55,7 @@ export const renderFormattedText = (text: string) => {
     // Italic : _text_
     if (part.length >= 3 && part.startsWith("_") && part.endsWith("_")) {
       return (
-        <span key={index} className="italic text-white">
+        <span key={index} className="italic text-[var(--editor-text)]">
           {part.slice(1, -1)}
         </span>
       );
@@ -67,7 +70,7 @@ export const renderFormattedText = (text: string) => {
           href={linkMatch[2]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-400 underline cursor-pointer hover:text-gray-300"
+          className="text-[var(--editor-link)] underline cursor-pointer hover:text-[var(--editor-link-hover)]"
         >
           {linkMatch[1]}
         </a>

@@ -322,7 +322,7 @@ const TextEditor = ({ id, value, type }: Props) => {
         }}
         onKeyDown={handleKeyDown}
         spellCheck={false}
-        className={`resize-none bg-transparent outline-none caret-white placeholder:text-gray-400 ${sharedClasses} ${isFocus ? "text-[#D4D4D4]" : "text-gray-300"}`}
+        className={`resize-none bg-transparent outline-none caret-[var(--editor-caret)] placeholder:text-[var(--editor-text-muted)] ${sharedClasses} ${isFocus ? "text-[var(--editor-text-focused)]" : "text-[var(--editor-text-unfocused)]"}`}
       />
     </div>
   );

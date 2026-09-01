@@ -6,7 +6,7 @@ type Props = {
 } & PropsWithChildren;
 
 export const Bullet = ({ block, children }: Props) => {
-  const style = "text-base text-white w-full";
+  const style = "text-base text-[var(--editor-text)] w-full";
 
   const richTexts = block.value as RichText[];
 
@@ -31,10 +31,10 @@ export const Bullet = ({ block, children }: Props) => {
 
   return (
     <div
-      className={`group relative flex w-full items-start py-0.5 text-[#D4D4D4]`}
+      className={`group relative flex w-full items-start py-0.5 text-[var(--editor-text-focused)]`}
     >
       <div className="mr-2 mt-0.5 flex h-6 w-5 shrink-0 items-center justify-center select-none">
-        <div className="h-1.5 w-1.5 rounded-full bg-gray-900 dark:bg-white" />
+        <div className="h-1.5 w-1.5 rounded-full bg-[var(--editor-bullet-dot)]" />
       </div>
 
       {children ? children : <p className={style}>{renderRichText()}</p>}

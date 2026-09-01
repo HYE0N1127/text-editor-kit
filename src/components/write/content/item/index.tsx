@@ -61,17 +61,17 @@ const EditorBlock = memo(({ id }: { id: string }) => {
     <Dragger id={id}>
       <div className="group/line relative flex w-full items-start">
         {isClosest && (
-          <div className="pointer-events-none absolute top-0 left-0 right-0 z-50 h-[2px] bg-blue-500" />
+          <div className="pointer-events-none absolute top-0 left-0 right-0 z-50 h-[2px] bg-[var(--editor-accent)]" />
         )}
 
         <div className="absolute -left-5 top-0 bottom-0 flex items-center justify-center invisible opacity-0 transition-all duration-200 group-hover/line:visible group-hover/line:opacity-100">
-          <div className="flex h-5 w-4 cursor-grab items-center justify-center rounded text-gray-400 hover:text-gray-200 transition-colors active:cursor-grabbing">
+          <div className="flex h-5 w-4 cursor-grab items-center justify-center rounded text-[var(--editor-drag-icon)] hover:text-[var(--editor-drag-icon-hover)] transition-colors active:cursor-grabbing">
             <MdDragIndicator size={18} />
           </div>
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="rounded-md hover:bg-gray-800 transition-colors duration-200 my-0.5 px-1 py-0.5">
+          <div className="rounded-md hover:bg-[var(--editor-hover-bg)] transition-colors duration-200 my-0.5 px-1 py-0.5">
             {renderBlockContent()}
           </div>
         </div>

@@ -6,7 +6,7 @@ type Props = {
 } & PropsWithChildren;
 
 export const Quote = ({ block, children }: Props) => {
-  const style = "text-base text-white w-full";
+  const style = "text-base text-[var(--editor-text)] w-full";
 
   const richTexts = block.value as RichText[];
 
@@ -31,7 +31,7 @@ export const Quote = ({ block, children }: Props) => {
 
   return (
     <div className={`group relative flex w-full items-start py-1`}>
-      <div className="mr-3 w-[3px] shrink-0 self-stretch rounded-full bg-gray-300 dark:bg-gray-600" />
+      <div className="mr-3 w-[3px] shrink-0 self-stretch rounded-full bg-[var(--editor-quote-bar)]" />
       {children ? children : <p className={style}>{renderRichText()}</p>}
     </div>
   );

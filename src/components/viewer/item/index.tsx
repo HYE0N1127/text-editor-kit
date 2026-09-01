@@ -65,7 +65,7 @@ const ViewerBlock = memo(({ id, nodes }: Props) => {
                 className="max-w-full rounded-md"
               />
             ) : (
-              <div className="w-full h-20 bg-gray-100 dark:bg-gray-800 rounded-md animate-pulse" />
+              <div className="w-full h-20 bg-[var(--editor-skeleton-bg)] rounded-md animate-pulse" />
             )}
           </Image>
         );

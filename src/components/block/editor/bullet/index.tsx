@@ -271,7 +271,7 @@ const BulletEditor = ({ id }: Props) => {
       }}
     >
       <div className="mr-2 mt-0.5 flex h-6 w-5 shrink-0 items-center justify-center select-none">
-        <div className="h-1.5 w-1.5 rounded-full bg-gray-900 dark:bg-white" />
+        <div className="h-1.5 w-1.5 rounded-full bg-[var(--editor-bullet-dot)]" />
       </div>
       <div
         ref={editorRef}
@@ -285,7 +285,7 @@ const BulletEditor = ({ id }: Props) => {
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         spellCheck={false}
-        className={`block flex-1 w-full resize-none bg-transparent p-0 text-base leading-6 focus:outline-none placeholder:text-gray-400 break-words whitespace-pre-wrap outline-none caret-white cursor-text ${isFocus ? "text-[#D4D4D4]" : "text-gray-300"}`}
+        className={`block flex-1 w-full resize-none bg-transparent p-0 text-base leading-6 focus:outline-none placeholder:text-[var(--editor-text-muted)] break-words whitespace-pre-wrap outline-none caret-[var(--editor-caret)] cursor-text ${isFocus ? "text-[var(--editor-text-focused)]" : "text-[var(--editor-text-unfocused)]"}`}
       />
     </div>
   );
