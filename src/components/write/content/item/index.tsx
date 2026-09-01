@@ -59,12 +59,12 @@ const EditorBlock = memo(({ id }: { id: string }) => {
 
   return (
     <Dragger id={id}>
-      <div className="group/line relative flex w-full items-start">
+      <div className="group/line relative flex w-full items-start pl-6">
         {isClosest && (
           <div className="pointer-events-none absolute top-0 left-0 right-0 z-50 h-[2px] bg-[var(--editor-accent)]" />
         )}
 
-        <div className="flex w-6 shrink-0 items-center justify-center self-stretch invisible opacity-0 transition-all duration-200 group-hover/line:visible group-hover/line:opacity-100">
+        <div className="absolute left-0 top-0 bottom-0 flex w-6 items-center justify-center invisible opacity-0 transition-all duration-200 group-hover/line:visible group-hover/line:opacity-100">
           <div
             data-drag-handle
             className="flex h-5 w-4 cursor-grab items-center justify-center rounded text-[var(--editor-drag-icon)] hover:text-[var(--editor-drag-icon-hover)] transition-colors active:cursor-grabbing"
