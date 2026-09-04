@@ -270,9 +270,6 @@ const BulletEditor = ({ id }: Props) => {
         if (!isFocus && target.tagName.toLowerCase() !== "a") setFocusId(id);
       }}
     >
-      <div className="mr-2 mt-0.5 flex h-6 w-5 shrink-0 items-center justify-center select-none">
-        <div className="h-1.5 w-1.5 rounded-full bg-[var(--editor-bullet-dot)]" />
-      </div>
       <div
         ref={editorRef}
         contentEditable={true}
